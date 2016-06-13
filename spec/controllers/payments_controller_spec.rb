@@ -13,7 +13,7 @@ RSpec.describe PaymentsController, type: :controller do
      let(:loan) { Loan.create!(funded_amount: 500) }
 
      it 'responds with a 200' do
-        post :create, payment: {amount: 500.0, date: Date.today}, loan_id: loan.id
+        post :create, payment: {amount: 500, date: Date.today}, loan_id: loan.id
         expect(response).to have_http_status(:ok)
       end
     end
@@ -57,5 +57,19 @@ RSpec.describe PaymentsController, type: :controller do
       end
 
     end
+
+    context 'when amount is greater than loan' do
+      let(:loan) { Loan.create!(funded_amount: 500) }
+      it 'responds with a 400' do
+        post :create, payment: {amount: 501, date: Date.today}, loan_id: loan.id
+        expect(response).to have_http_status(:bad_request)
+      end
+      it 'responds with an error message' do
+        post :create, payment: {amount: 501, date: Date.today}, loan_id: loan.id
+        expect(response.body).to include("Amount can't be greater than loan balance")
+      end
+
+    end
+ 
   end
 end
