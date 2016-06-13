@@ -1,3 +1,3 @@
 class Payment < ActiveRecord::Base
-  belongs_to :loans
+  belongs_to :loan
 end
