@@ -16,35 +16,47 @@ RSpec.describe LoansController, type: :controller do
     context 'when a loan exists' do
       before do
         loan = Loan.create!(funded_amount: 100)
+        get :index
+        @body = parse_json_array(response.body)
       end
       it 'includes an id' do
-        get :index
-        body = parse_json(response.body)
-        expect(body['id']).to eq(1)
+        expect(@body['id']).to eq(1)
       end
 
       it 'includes a funded_amount' do
-        get :index
-        body = parse_json(response.body)
-        expect(body['funded_amount']).to eq("100.0")
+        expect(@body['funded_amount']).to eq("100.0")
       end
       it 'includes a balance' do
-        get :index
-        body = parse_json(response.body)
-        expect(body['balance']).to eq("100.0")
+        expect(@body['balance']).to eq("100.0")
       end
     end
   end
 
   describe '#show' do
-    let(:loan) { Loan.create!(funded_amount: 100.0) }
+    context 'when the loan exists' do
+      before do
+        @loan = Loan.create!(funded_amount: 100)
+        get :show, id: @loan.id
+        @body = parse_json(response.body)
+      end
 
-    it 'responds with a 200' do
-      get :show, id: loan.id
-      expect(response).to have_http_status(:ok)
+      it 'responds with a 200' do
+        get :show, id: @loan.id
+        expect(response).to have_http_status(:ok)
+      end
+      it 'includes an id' do
+        expect(@body['id']).to eq(1)
+      end
+
+      it 'includes a funded_amount' do
+        expect(@body['funded_amount']).to eq("100.0")
+      end
+      it 'includes a balance' do
+        expect(@body['balance']).to eq("100.0")
+      end
     end
 
-    context 'if the loan is not found' do
+    context 'when the loan doesnt exist' do
       it 'responds with a 404' do
         get :show, id: 10000
         expect(response).to have_http_status(:not_found)
@@ -52,7 +64,11 @@ RSpec.describe LoansController, type: :controller do
     end
   end
 
-  def parse_json body
+  def parse_json_array body
     JSON.parse(body).first
   end
+  def parse_json body
+    JSON.parse(body)
+  end
+
 end
